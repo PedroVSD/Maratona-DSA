@@ -1,27 +1,35 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
 int main(void){
-    int n, ponto = 1, maior = 1;
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int n, pontos = 1, max_pontos = 1;
+
     cin >> n;
+    vector<int> valores(n);
 
-    int vetor[n];
 
-    for(auto &i: vetor){
-        cin >> i;
+
+    for(int i = 0; i < n; i++){
+        cin >> valores[i];
     }
 
     for(int i = 1; i < n; i++){
-        if(vetor[i] == vetor[i-1]){
-            ponto++;
-        }else{
-            ponto = 1;
-        }
-        if(ponto > maior){
-            maior = ponto;
+        if(valores[i] == valores[i-1]){
+            pontos++;
+        } else {
+            max_pontos = max(pontos, max_pontos);
+            pontos = 1;
+
+
         }
     }
+    cout << max_pontos<< endl;
 
-    cout << maior << endl;
 }

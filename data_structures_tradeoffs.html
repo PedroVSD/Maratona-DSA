@@ -1,0 +1,212 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{padding:1rem 0}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.25rem}
+.filter-btn{padding:5px 14px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);font-size:13px;cursor:pointer;transition:all .15s}
+.filter-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;cursor:pointer;transition:border-color .15s}
+.card:hover{border-color:var(--color-border-secondary)}
+.card.open{border-color:var(--color-border-primary)}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.tag{font-size:11px;padding:3px 8px;border-radius:12px;font-weight:500}
+.tag-linear{background:#E6F1FB;color:#185FA5}
+.tag-tree{background:#EAF3DE;color:#3B6D11}
+.tag-hash{background:#FAEEDA;color:#854F0B}
+.tag-graph{background:#EEEDFE;color:#534AB7}
+.tag-heap{background:#FBEAF0;color:#993556}
+@media(prefers-color-scheme:dark){
+  .tag-linear{background:#0C447C;color:#B5D4F4}
+  .tag-tree{background:#27500A;color:#C0DD97}
+  .tag-hash{background:#633806;color:#FAC775}
+  .tag-graph{background:#3C3489;color:#CECBF6}
+  .tag-heap{background:#72243E;color:#F4C0D1}
+}
+.ds-name{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.ds-sub{font-size:12px;color:var(--color-text-secondary);margin-bottom:10px}
+.ops{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0}
+.op{font-size:11px;display:flex;align-items:center;gap:4px;color:var(--color-text-secondary)}
+.complexity{font-size:11px;font-family:var(--font-mono);padding:2px 6px;border-radius:4px;font-weight:500}
+.c-o1{background:#EAF3DE;color:#3B6D11}
+.c-olog{background:#E6F1FB;color:#185FA5}
+.c-on{background:#FAEEDA;color:#854F0B}
+.c-on2{background:#FCEBEB;color:#A32D2D}
+@media(prefers-color-scheme:dark){
+  .c-o1{background:#27500A;color:#C0DD97}
+  .c-olog{background:#0C447C;color:#B5D4F4}
+  .c-on{background:#633806;color:#FAC775}
+  .c-on2{background:#791F1F;color:#F7C1C1}
+}
+.details{display:none;margin-top:12px;border-top:0.5px solid var(--color-border-tertiary);padding-top:12px}
+.card.open .details{display:block}
+.section{margin-bottom:10px}
+.section-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-tertiary);margin-bottom:6px}
+.point{font-size:13px;color:var(--color-text-secondary);padding:3px 0 3px 12px;position:relative;line-height:1.5}
+.point::before{content:'';position:absolute;left:3px;top:10px;width:4px;height:4px;border-radius:50%}
+.pro::before{background:#639922}
+.con::before{background:#E24B4A}
+.use::before{background:#378ADD}
+.hint{font-size:12px;color:var(--color-text-tertiary);text-align:center;margin-top:.5rem}
+</style>
+<div class="wrap">
+<h2 class="sr-only">Trade-offs das principais estruturas de dados</h2>
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-cat="all">Todas</button>
+  <button class="filter-btn" data-cat="linear">Linear</button>
+  <button class="filter-btn" data-cat="tree">Árvore</button>
+  <button class="filter-btn" data-cat="hash">Hash</button>
+  <button class="filter-btn" data-cat="graph">Grafo</button>
+  <button class="filter-btn" data-cat="heap">Heap</button>
+</div>
+<div class="grid" id="grid"></div>
+<p class="hint">Clique em uma card para ver os detalhes</p>
+</div>
+<script>
+const DS = [
+  {
+    name:"Array",cat:"linear",tagLabel:"Linear",
+    sub:"Sequência contígua em memória",
+    ops:[{l:"Acesso",c:"O(1)",t:"o1"},{l:"Busca",c:"O(n)",t:"on"},{l:"Insert./Del. no fim",c:"O(1)",t:"o1"},{l:"Insert./Del. no meio",c:"O(n)",t:"on"}],
+    pros:["Acesso aleatório em O(1) por índice","Cache-friendly: elementos contíguos na memória","Simples e zero overhead de ponteiros"],
+    cons:["Inserção/deleção no meio é O(n) (shift)","Tamanho fixo em arrays estáticos","Redimensionamento caro em arrays dinâmicos (amortizado O(1))"],
+    uses:["Acesso frequente por índice","Buffers, filas circulares, matrizes","Base para outras estruturas (heaps, tabelas hash)"]
+  },
+  {
+    name:"Linked List",cat:"linear",tagLabel:"Linear",
+    sub:"Nós encadeados por ponteiros",
+    ops:[{l:"Acesso",c:"O(n)",t:"on"},{l:"Busca",c:"O(n)",t:"on"},{l:"Insert./Del. na head",c:"O(1)",t:"o1"},{l:"Insert./Del. no meio",c:"O(n)*",t:"on"}],
+    pros:["Inserção/deleção na cabeça em O(1)","Tamanho dinâmico sem realocação","Ótima para implementar stacks e queues"],
+    cons:["Sem acesso aleatório: O(n) para acessar índice k","Cache-unfriendly: nós espalhados na memória","Overhead de ponteiros por nó"],
+    uses:["Implementação de stacks e queues","LRU Cache (doubly linked)","Situações de inserção/deleção frequentes na extremidade"]
+  },
+  {
+    name:"Stack",cat:"linear",tagLabel:"Linear",
+    sub:"LIFO — Last In, First Out",
+    ops:[{l:"Push/Pop",c:"O(1)",t:"o1"},{l:"Peek",c:"O(1)",t:"o1"},{l:"Busca",c:"O(n)",t:"on"}],
+    pros:["Push e pop em O(1)","Semântica clara e restrita (LIFO)","Ideal para problemas de recursão/backtracking"],
+    cons:["Sem acesso aleatório","Stack overflow em recursão profunda","Flexibilidade limitada"],
+    uses:["Call stack, undo/redo","Avaliação de expressões (DFS iterativo)","Validação de parênteses"]
+  },
+  {
+    name:"Queue",cat:"linear",tagLabel:"Linear",
+    sub:"FIFO — First In, First Out",
+    ops:[{l:"Enqueue/Dequeue",c:"O(1)",t:"o1"},{l:"Peek",c:"O(1)",t:"o1"},{l:"Busca",c:"O(n)",t:"on"}],
+    pros:["Enqueue e dequeue em O(1)","Garante ordem de chegada (fairness)","Variantes: deque, priority queue, circular"],
+    cons:["Sem acesso aleatório","Menos flexível que arrays para consultas gerais"],
+    uses:["BFS em grafos","Sistemas de tarefas / filas de processamento","Buffers de I/O, scheduling"]
+  },
+  {
+    name:"Hash Table",cat:"hash",tagLabel:"Hash",
+    sub:"Mapeamento chave → valor por hash",
+    ops:[{l:"Insert/Delete/Busca",c:"O(1)*",t:"o1"},{l:"Pior caso",c:"O(n)",t:"on"},{l:"Iteração",c:"O(n)",t:"on"}],
+    pros:["Busca, inserção e deleção médio O(1)","Flexível: qualquer chave hashable","Amplamente suportada em todas as linguagens"],
+    cons:["Sem ordenação: iteração não é ordenada","Colisões degradam para O(n) no pior caso","Alto consumo de memória (load factor + ponteiros)","Não adequada para range queries"],
+    uses:["Caches, memoization","Contagem de frequências","Deduplicação, lookup tables"]
+  },
+  {
+    name:"Binary Search Tree",cat:"tree",tagLabel:"Árvore",
+    sub:"BST: nós com invariante esquerda < raiz < direita",
+    ops:[{l:"Busca/Insert/Del.",c:"O(log n)*",t:"olog"},{l:"Pior caso (degenerada)",c:"O(n)",t:"on"},{l:"Min/Max",c:"O(log n)",t:"olog"}],
+    pros:["Mantém elementos ordenados","Operações em O(log n) se balanceada","In-order traversal retorna dados ordenados"],
+    cons:["Pode degenerar em lista (O(n)) sem balanceamento","Sem auto-balanceamento: precisa de AVL/Red-Black para garantias"],
+    uses:["Símbolo de tabelas em compiladores","Implementação de maps/sets em muitas linguagens","Quando ordem + busca são necessárias"]
+  },
+  {
+    name:"AVL / Red-Black Tree",cat:"tree",tagLabel:"Árvore",
+    sub:"BST auto-balanceada",
+    ops:[{l:"Busca/Insert/Del.",c:"O(log n)",t:"olog"},{l:"Min/Max",c:"O(log n)",t:"olog"},{l:"Range query",c:"O(log n + k)",t:"olog"}],
+    pros:["Garante O(log n) mesmo no pior caso","Mantém ordem; range queries eficientes","Base do std::map (C++) e TreeMap (Java)"],
+    cons:["Rotações adicionam constante de implementação","Maior overhead de memória que hash table","Mais complexo de implementar do zero"],
+    uses:["Maps/sets com dados ordenados","Databases (índices B-Tree)","Situações que exigem ordem + busca garantida"]
+  },
+  {
+    name:"Heap (Min/Max)",cat:"heap",tagLabel:"Heap",
+    sub:"Árvore binária completa com propriedade de ordem",
+    ops:[{l:"Insert",c:"O(log n)",t:"olog"},{l:"Extract min/max",c:"O(log n)",t:"olog"},{l:"Peek min/max",c:"O(1)",t:"o1"},{l:"Busca geral",c:"O(n)",t:"on"}],
+    pros:["Acesso ao mínimo/máximo em O(1)","Heapify in-place em O(n)","Base eficiente para priority queues"],
+    cons:["Sem busca eficiente para valores arbitrários","Sem ordem completa: apenas raiz é garantida","Range queries ineficientes"],
+    uses:["Dijkstra, A*, Prim (priority queue)","Heap sort","Top-K elements, merge de k listas ordenadas"]
+  },
+  {
+    name:"Trie",cat:"tree",tagLabel:"Árvore",
+    sub:"Árvore de prefixos para strings",
+    ops:[{l:"Insert/Busca",c:"O(m)",t:"o1"},{l:"Prefix search",c:"O(m + k)",t:"o1"},{l:"Delete",c:"O(m)",t:"o1"}],
+    pros:["Busca por prefixo extremamente eficiente","O(m) por palavra independente do dicionário","Compartilha prefixos: econômico para vocabulários similares"],
+    cons:["Altíssimo consumo de memória para alfabetos grandes","Implementação mais complexa que hash table","Cache-unfriendly por conta de ponteiros dispersos"],
+    uses:["Autocomplete, sugestões de busca","Verificação ortográfica","Roteamento de IP (radix trie)"]
+  },
+  {
+    name:"Graph (Adj. List)",cat:"graph",tagLabel:"Grafo",
+    sub:"Vértices + listas de adjacência",
+    ops:[{l:"Adicionar aresta",c:"O(1)",t:"o1"},{l:"Checar aresta",c:"O(d)",t:"on"},{l:"BFS/DFS",c:"O(V+E)",t:"on"}],
+    pros:["Eficiente em memória para grafos esparsos: O(V+E)","Iteração sobre vizinhos é rápida","Mais natural para a maioria dos algoritmos de grafos"],
+    cons:["Checar se aresta existe é O(d) (grau do vértice)","Não ideal para grafos densos"],
+    uses:["Redes sociais, mapas, dependências","BFS, DFS, Dijkstra, Bellman-Ford","Qualquer problema de grafo esparso"]
+  },
+  {
+    name:"Graph (Adj. Matrix)",cat:"graph",tagLabel:"Grafo",
+    sub:"Matriz V×V de adjacência",
+    ops:[{l:"Checar aresta",c:"O(1)",t:"o1"},{l:"Adicionar aresta",c:"O(1)",t:"o1"},{l:"Memória",c:"O(V²)",t:"on2"}],
+    pros:["Checar existência de aresta em O(1)","Simples de implementar","Bom para grafos densos"],
+    cons:["Memória O(V²): inviável para grafos grandes e esparsos","Iteração sobre vizinhos é O(V) mesmo com poucos vizinhos"],
+    uses:["Floyd-Warshall","Grafos pequenos e densos","Multiplicação de matrizes para grafos"]
+  },
+  {
+    name:"Segment Tree",cat:"tree",tagLabel:"Árvore",
+    sub:"Árvore para range queries com updates",
+    ops:[{l:"Build",c:"O(n)",t:"on"},{l:"Range query",c:"O(log n)",t:"olog"},{l:"Point update",c:"O(log n)",t:"olog"}],
+    pros:["Range queries e updates em O(log n)","Muito versátil: soma, mínimo, máximo, GCD etc.","Com lazy propagation: range updates também em O(log n)"],
+    cons:["O(4n) de memória","Implementação não trivial","Overkill para arrays estáticos (prefix sum basta)"],
+    uses:["Competitive programming","Queries de soma/mínimo em intervalos com updates","Fenwick tree é alternativa mais simples para soma"]
+  }
+];
+
+const tagClass={linear:"tag-linear",tree:"tag-tree",hash:"tag-hash",graph:"tag-graph",heap:"tag-heap"};
+
+function cClass(t){return{o1:"c-o1",olog:"c-olog",on:"c-on",on2:"c-on2"}[t]||"c-on";}
+
+function render(cat){
+  const grid=document.getElementById("grid");
+  const filtered=cat==="all"?DS:DS.filter(d=>d.cat===cat);
+  grid.innerHTML=filtered.map((d,i)=>`
+    <div class="card" onclick="toggle(this)">
+      <div class="card-header">
+        <span class="${tagClass[d.cat]} tag">${d.tagLabel}</span>
+        <span class="ds-name">${d.name}</span>
+      </div>
+      <div class="ds-sub">${d.sub}</div>
+      <div class="ops">
+        ${d.ops.map(o=>`<span class="op">${o.l}: <span class="complexity ${cClass(o.t)}">${o.c}</span></span>`).join("")}
+      </div>
+      <div class="details">
+        <div class="section">
+          <div class="section-title">✓ Vantagens</div>
+          ${d.pros.map(p=>`<div class="point pro">${p}</div>`).join("")}
+        </div>
+        <div class="section">
+          <div class="section-title">✗ Desvantagens</div>
+          ${d.cons.map(c=>`<div class="point con">${c}</div>`).join("")}
+        </div>
+        <div class="section">
+          <div class="section-title">→ Quando usar</div>
+          ${d.uses.map(u=>`<div class="point use">${u}</div>`).join("")}
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function toggle(el){el.classList.toggle("open")}
+
+document.getElementById("filters").addEventListener("click",e=>{
+  const btn=e.target.closest(".filter-btn");
+  if(!btn)return;
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  render(btn.dataset.cat);
+});
+
+render("all");
+</script>
